@@ -1,10 +1,13 @@
 from django.contrib.auth import authenticate
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .models import User
+from .permissions import IsAdminCoordinator
 from .serializers import LoginSerializer, UserSerializer
 
 
@@ -43,3 +46,11 @@ class LogoutView(APIView):
 class MeView(APIView):
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+
+class AgentListView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminCoordinator]
+
+    def get_queryset(self):
+        return User.objects.filter(role=User.Role.AGENT).order_by('username')
