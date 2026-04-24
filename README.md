@@ -6,7 +6,7 @@ It helps Admin Coordinators and Field Agents track field lifecycle, submit obser
 ## Stack
 - Backend: Django + Django REST Framework + Token Authentication
 - Frontend: React + Vite + React Router
-- Database: SQLite (dev default, swappable to PostgreSQL in production)
+- Database: MySQL (relational)
 
 ## Core Features
 - Role-based access (`ADMIN`, `AGENT`)
@@ -43,11 +43,17 @@ cd Smart_Crop
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r backend/requirements.txt
+cp .env.example .env
 python backend/manage.py migrate
 python backend/manage.py seed_demo
 python backend/manage.py runserver
 ```
 Backend runs on `http://127.0.0.1:8000`.
+
+Before running migrations, ensure MySQL is running and create the database:
+```sql
+CREATE DATABASE fieldpulse_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
 ### 3. Frontend setup
 In a second terminal:
