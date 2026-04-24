@@ -79,24 +79,6 @@ source .venv/bin/activate
 python backend/manage.py test accounts monitoring -v 2
 ```
 
-## Deployment Guide
-### Option A: Render (recommended for quick demo)
-1. Push this repository to GitHub.
-2. Create a new **Web Service** for backend:
-   - Root Directory: `backend`
-   - Build Command: `pip install -r requirements.txt && python manage.py migrate && python manage.py seed_demo`
-   - Start Command: `gunicorn config.wsgi:application`
-3. Add environment variables:
-   - `DJANGO_SECRET_KEY`
-   - `DJANGO_DEBUG=False`
-   - `DJANGO_ALLOWED_HOSTS=<backend-service-domain>`
-   - `DJANGO_CORS_ALLOWED_ORIGINS=<frontend-domain>`
-4. Deploy frontend (Vercel/Netlify/Render Static Site):
-   - Root Directory: `frontend`
-   - Build Command: `npm install && npm run build`
-   - Publish Directory: `dist`
-   - Env: `VITE_API_BASE_URL=https://<backend-domain>/api`
-
 ## Assumptions
 - Admin handles field creation and assignment.
 - Agents do not directly edit field metadata; they submit updates.
