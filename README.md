@@ -31,6 +31,45 @@ This keeps logic simple and transparent while still surfacing actionable risk si
 - `frontend/` React app
 - `docs/` supporting notes
 
+## Database Guide
+This project is configured to use **MySQL by default**.
+
+### Where your data is stored
+- With `DB_ENGINE=mysql`, data is stored inside your MySQL server, not as a file in this project.
+- That is why you will not see `db.sqlite3` in the directory.
+
+### MySQL environment variables
+Set these in `.env` (copied from `.env.example`):
+- `DB_ENGINE=mysql`
+- `MYSQL_DATABASE=fieldpulse_db`
+- `MYSQL_USER=root`
+- `MYSQL_PASSWORD=...`
+- `MYSQL_HOST=127.0.0.1`
+- `MYSQL_PORT=3306`
+
+### Create and inspect the MySQL database
+Create DB once:
+```sql
+CREATE DATABASE fieldpulse_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Inspect DB/tables:
+```bash
+mysql -u root -p
+```
+```sql
+SHOW DATABASES;
+USE fieldpulse_db;
+SHOW TABLES;
+```
+
+### Optional SQLite mode (creates a local file)
+If you want a visible file database for quick local testing:
+- set `DB_ENGINE=sqlite` in `.env`
+- run `python backend/manage.py migrate`
+
+Then Django will create `backend/db.sqlite3`.
+
 ## Local Setup
 ### 1. Clone and open project
 ```bash
@@ -49,11 +88,6 @@ python backend/manage.py seed_demo
 python backend/manage.py runserver
 ```
 Backend runs on `http://127.0.0.1:8000`.
-
-Before running migrations, ensure MySQL is running and create the database:
-```sql
-CREATE DATABASE fieldpulse_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
 
 ### 3. Frontend setup
 In a second terminal:
