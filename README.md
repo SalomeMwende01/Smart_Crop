@@ -26,6 +26,13 @@ Computed status is derived from `current_stage` and `planting_date`:
 
 This keeps logic simple and transparent while still surfacing actionable risk signals.
 
+## Design Decisions
+- **Monorepo structure**: Backend and frontend live in one repository to simplify setup, grading, and coordinated changes.
+- **Role-first access model**: The API and UI are separated by role (`ADMIN`, `AGENT`) so each user sees only relevant actions and data.
+- **Status as computed logic**: `Active`, `At Risk`, and `Completed` are computed from stage + planting date, not manually edited, to keep status consistent.
+- **Simple token authentication**: Token auth was chosen for straightforward API security and easy React integration.
+- **MySQL default with SQLite fallback**: MySQL is the primary relational database target; SQLite is available for quick local fallback/debugging.
+
 ## Monorepo Structure
 - `backend/` Django project (`config`, `accounts`, `monitoring`)
 - `frontend/` React app
@@ -72,7 +79,7 @@ Then Django will create `backend/db.sqlite3`.
 ## Local Setup
 ### 1. Clone and open project
 ```bash
-git clone <https://github.com/SalomeMwende01/Smart_Crop>
+git clone https://github.com/SalomeMwende01/Smart_Crop.git
 cd Smart_Crop
 ```
 
@@ -82,6 +89,9 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r backend/requirements.txt
 cp .env.example .env
+set -a
+source .env
+set +a
 python backend/manage.py migrate
 python backend/manage.py seed_demo
 python backend/manage.py runserver
