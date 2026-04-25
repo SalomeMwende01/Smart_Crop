@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   STAGE_OPTIONS,
@@ -14,11 +14,13 @@ function AgentDashboardPage() {
   const [dashboard, setDashboard] = useState(null)
   const [fields, setFields] = useState([])
   const [fieldUpdates, setFieldUpdates] = useState({})
+  const [updatesLoaded, setUpdatesLoaded] = useState({})
+  const [refreshingUpdates, setRefreshingUpdates] = useState({})
   const [formState, setFormState] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     setError('')
 
@@ -27,34 +29,53 @@ function AgentDashboardPage() {
       setDashboard(dashboardData)
       setFields(fieldData)
 
-      const initialForm = {}
-      fieldData.forEach((field) => {
-        initialForm[field.id] = {
-          stage: field.current_stage,
-          note: '',
-          submitting: false,
-          success: '',
-        }
+      const updatesEntries = await Promise.all(
+        fieldData.map(async (field) => {
+          try {
+            const updates = await fetchFieldUpdates(field.id)
+            return [field.id, updates]
+          } catch {
+            return [field.id, []]
+          }
+        }),
+      )
+      setFieldUpdates(Object.fromEntries(updatesEntries))
+      setUpdatesLoaded(Object.fromEntries(fieldData.map((field) => [field.id, true])))
+
+      setFormState((prev) => {
+        const initialForm = {}
+        fieldData.forEach((field) => {
+          initialForm[field.id] = {
+            stage: prev[field.id]?.stage ?? field.current_stage,
+            note: prev[field.id]?.note ?? '',
+            submitting: prev[field.id]?.submitting ?? false,
+            success: prev[field.id]?.success ?? '',
+          }
+        })
+        return initialForm
       })
-      setFormState(initialForm)
     } catch {
       setError('Unable to load your assigned fields.')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData()
-  }, [])
+  }, [loadData])
 
   const loadUpdates = async (fieldId) => {
+    setRefreshingUpdates((prev) => ({ ...prev, [fieldId]: true }))
     try {
       const updates = await fetchFieldUpdates(fieldId)
       setFieldUpdates((prev) => ({ ...prev, [fieldId]: updates }))
+      setUpdatesLoaded((prev) => ({ ...prev, [fieldId]: true }))
     } catch {
       setError('Unable to load field updates.')
+    } finally {
+      setRefreshingUpdates((prev) => ({ ...prev, [fieldId]: false }))
     }
   }
 
@@ -113,6 +134,8 @@ function AgentDashboardPage() {
             success: '',
           }
           const updates = fieldUpdates[field.id] || []
+          const isRefreshing = Boolean(refreshingUpdates[field.id])
+          const hasLoadedUpdates = Boolean(updatesLoaded[field.id])
 
           return (
             <article className="content-card" key={field.id}>
@@ -153,8 +176,13 @@ function AgentDashboardPage() {
                 {currentForm.success ? <p className="success-text">{currentForm.success}</p> : null}
               </form>
 
-              <button className="ghost-btn" type="button" onClick={() => loadUpdates(field.id)}>
-                Refresh updates
+              <button
+                className="ghost-btn"
+                type="button"
+                onClick={() => loadUpdates(field.id)}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? 'Refreshing...' : 'Refresh updates'}
               </button>
 
               {updates.length > 0 ? (
@@ -167,7 +195,9 @@ function AgentDashboardPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="muted">No updates loaded yet.</p>
+                <p className="muted">
+                  {hasLoadedUpdates ? 'No updates submitted yet.' : 'Click refresh updates to load latest notes.'}
+                </p>
               )}
             </article>
           )
