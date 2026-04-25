@@ -50,7 +50,7 @@ class FieldUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FieldUpdate
         fields = ['id', 'field', 'stage', 'note', 'created_by', 'created_at']
-        read_only_fields = ['created_by', 'created_at']
+        read_only_fields = ['field', 'created_by', 'created_at']
 
     def get_created_by(self, obj):
         return {
