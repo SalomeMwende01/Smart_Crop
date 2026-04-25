@@ -34,9 +34,8 @@ This keeps logic simple and transparent while still surfacing actionable risk si
 ## Database Guide
 This project is configured to use **MySQL by default**.
 
-### Where your data is stored
-- With `DB_ENGINE=mysql`, data is stored inside your MySQL server, not as a file in this project.
-- That is why you will not see `db.sqlite3` in the directory.
+### Where data is stored
+- With `DB_ENGINE=mysql`, data is stored inside MySQL server.
 
 ### MySQL environment variables
 Set these in `.env` (copied from `.env.example`):
@@ -73,7 +72,7 @@ Then Django will create `backend/db.sqlite3`.
 ## Local Setup
 ### 1. Clone and open project
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/SalomeMwende01/Smart_Crop>
 cd Smart_Crop
 ```
 
